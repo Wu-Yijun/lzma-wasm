@@ -1,6 +1,6 @@
+use lzma_rust2::{LzipReader, LzmaOptions, LzmaReader, LzmaWriter, XzReader};
+use std::io::{Read, Write};
 use wasm_bindgen::prelude::*;
-use lzma_rust2::{LzmaReader, XzReader, LzipReader};
-use std::io::Read;
 
 enum AutoReader<'a> {
     Lzma(LzmaReader<&'a [u8]>),
@@ -18,31 +18,28 @@ impl<'a> Read for AutoReader<'a> {
     }
 }
 
-#[wasm_bindgen]
-pub fn decode_lzma_to_buffer(compressed: &[u8], out_buffer: &mut [u8]) -> Result<usize, JsValue> {
+fn detect_decompress_reader(compressed: &[u8], mem_limit: u32) -> Result<AutoReader<'_>, JsValue> {
     if compressed.len() < 6 {
         return Err(JsValue::from_str("输入的数据太短，无法识别格式"));
     }
-
-    // 探针检测
-    let is_xz = compressed.starts_with(&[0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00]);
-    let is_lzip = compressed.starts_with(&[0x4C, 0x5A, 0x49, 0x50]); // b"LZIP"
-
-    // 路由分发
-    let mut reader = if is_xz {
+    if compressed.starts_with(&[0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00]) {
         let r = XzReader::new(compressed, true);
-            // .map_err(|e| JsValue::from_str(&format!("初始化 XzReader 失败: {}", e)))?;
-        AutoReader::Xz(r)
-    } else if is_lzip {
+        // .map_err(|e| JsValue::from_str(&format!("初始化 XzReader 失败: {}", e)))?;
+        Ok(AutoReader::Xz(r))
+    } else if compressed.starts_with(&[0x4C, 0x5A, 0x49, 0x50]) {
         let r = LzipReader::new(compressed);
-            // .map_err(|e| JsValue::from_str(&format!("初始化 LzipReader 失败: {}", e)))?;
-        AutoReader::Lzip(r)
+        // .map_err(|e| JsValue::from_str(&format!("初始化 LzipReader 失败: {}", e)))?;
+        Ok(AutoReader::Lzip(r))
     } else {
-        // Fallback 到传统的 LZMA Alone
-        let r = LzmaReader::new_mem_limit(compressed, u32::MAX, None)
+        let r = LzmaReader::new_mem_limit(compressed, mem_limit, None)
             .map_err(|e| JsValue::from_str(&format!("初始化 LzmaReader 失败: {}", e)))?;
-        AutoReader::Lzma(r)
-    };
+        Ok(AutoReader::Lzma(r))
+    }
+}
+
+#[wasm_bindgen]
+pub fn decompress_to_buffer(compressed: &[u8], out_buffer: &mut [u8], mem_limit: u32) -> Result<usize, JsValue> {
+    let mut reader = detect_decompress_reader(compressed, mem_limit)?;
 
     let mut total_read = 0;
     let out_len = out_buffer.len();
@@ -63,4 +60,31 @@ pub fn decode_lzma_to_buffer(compressed: &[u8], out_buffer: &mut [u8]) -> Result
     }
 
     Ok(total_read)
+}
+
+// 给普通用户用的，返回 Vec<u8>，Rust 自己管理扩容
+#[wasm_bindgen]
+pub fn decompress_dynamic(compressed: &[u8], mem_limit: u32) -> Result<Vec<u8>, JsValue> {
+    let mut reader = detect_decompress_reader(compressed, mem_limit)?;
+
+    let mut decompressed = Vec::new();
+    // 使用 read_to_end 自动扩容
+    reader
+        .read_to_end(&mut decompressed)
+        .map_err(|e| JsValue::from_str(&format!("解压失败: {}", e)))?;
+
+    Ok(decompressed)
+}
+
+#[wasm_bindgen]
+pub fn encode_lzma_from_buffer(input: &[u8]) -> Result<Vec<u8>, JsValue> {
+    let mut writer = LzmaWriter::new_use_header(
+        Vec::new(),
+        &LzmaOptions::default(),
+        Some(input.len() as u64),
+    )
+    .unwrap();
+    writer.write_all(input).unwrap();
+    let res = writer.finish().unwrap();
+    Ok(res)
 }

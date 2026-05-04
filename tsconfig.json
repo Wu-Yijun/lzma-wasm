@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "./lib",
+    "outDir": "./dist",
+    "strict": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "lib/**/*"
+  ]
+}
