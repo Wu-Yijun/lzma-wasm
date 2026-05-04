@@ -1,8 +1,36 @@
 {
   "name": "lzma-wasm",
   "version": "1.0.2",
+  "author": "Aluria",
   "description": "High-performance universal LZMA/XZ/LZIP compressor & decompressor in WebAssembly (Rust bindings)",
-  "license": "Apache-2.0",
+  "keywords": [
+    "lzma",
+    "xz",
+    "lzip",
+    "wasm",
+    "webassembly",
+    "compress",
+    "decompress",
+    "archive",
+    "rust",
+    "zero-allocation",
+    "performance",
+    "browser",
+    "node"
+  ],
+  "homepage": "https://github.com/Wu-Yijun/lzma-wasm#readme",
+  "bugs": {
+    "url": "https://github.com/Wu-Yijun/lzma-wasm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wu-Yijun/lzma-wasm.git"
+  },
+  "license": "(MIT OR Apache-2.0)",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "type": "module",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
@@ -19,13 +47,13 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
   ],
   "scripts": {
     "build": "node ./scripts/build.ts",
     "tsc": "tsc",
-    "test": "vitest",
-    "test:browser": "vitest --browser.headless",
     "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {

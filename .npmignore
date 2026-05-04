@@ -1,0 +1,15 @@
+/lib/
+/lzma-test-ground/
+/node_modules/
+/pkg/
+/scripts/
+/src/
+/target/
+/test/
+
+/*.tgz
+/Cargo.toml
+/Cargo.lock
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
+/tsconfig.json
