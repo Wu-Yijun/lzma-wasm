@@ -36,7 +36,7 @@ export async function initWasm(): Promise<void> {
   }
 
   // 将字节流喂给 wasm-bindgen 的 init 函数
-  await init(wasmBytes);
+  await init({ module_or_path: wasmBytes });
   isReady = true;
 }
 
@@ -79,7 +79,7 @@ export function decompressToBuffer(
   memLimit?: number,
 ): number {
   if (!isReady) throw new Error("请先调用并等待 initWasm() 完成初始化");
-  return decompress_to_buffer(compressed, outBuffer, memLimit ?? MEM_LIMIT);
+  return decompress_to_buffer(compressed, outBuffer, memLimit ?? outBuffer.length);
 }
 
 export interface CompressOptions {

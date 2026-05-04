@@ -1,17 +1,19 @@
 {
   "name": "lzma-wasm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "High-performance universal LZMA/XZ/LZIP compressor & decompressor in WebAssembly (Rust bindings)",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "./dist/cjs/index.js",
+  "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/iife/index.js",
+  "jsdelivr": "./dist/iife/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
+      "require": "./dist/cjs/index.cjs",
       "default": "./dist/esm/index.js"
     }
   },
@@ -22,6 +24,8 @@
   "scripts": {
     "build": "node ./scripts/build.ts",
     "tsc": "tsc",
+    "test": "vitest",
+    "test:browser": "vitest --browser.headless",
     "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {

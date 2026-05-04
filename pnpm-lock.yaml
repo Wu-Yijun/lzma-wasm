@@ -18,6 +18,16 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  lzma-test-ground:
+    dependencies:
+      lzma-wasm:
+        specifier: file:..\lzma-wasm-1.0.1.tgz
+        version: file:lzma-wasm-1.0.1.tgz
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
+
 packages:
 
   '@esbuild/aix-ppc64@0.28.0':
@@ -184,6 +194,10 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  lzma-wasm@file:lzma-wasm-1.0.1.tgz:
+    resolution: {integrity: sha512-losliYQWdzNGuXfmAXYZ2SQNlycfjUW//hbvvdHmU+iSBKKDqjAIXZ5QLyQZfrxetCzb1AziQckQixP05yjemA==, tarball: file:lzma-wasm-1.0.1.tgz}
+    version: 1.0.1
+
   typescript@6.0.3:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
@@ -304,6 +318,8 @@ snapshots:
       '@esbuild/win32-arm64': 0.28.0
       '@esbuild/win32-ia32': 0.28.0
       '@esbuild/win32-x64': 0.28.0
+
+  lzma-wasm@file:lzma-wasm-1.0.1.tgz: {}
 
   typescript@6.0.3: {}
 

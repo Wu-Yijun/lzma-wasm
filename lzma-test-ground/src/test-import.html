@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+</head>
+
+<body>
+  <h1>测试 import 版本</h1>
+  <script src="./core.js"></script>
+  <script type="module">
+    import { initWasm, compress, decompress } from "../node_modules/lzma-wasm/dist/esm/index.js";
+    const tag = "module import";
+    const pass = run(tag, initWasm, compress, decompress);
+    if (pass) {
+      document.body.insertAdjacentHTML("beforeend", `<p style="color: green;"> 载入 ${tag} 测试通过！</p>`);
+    } else {
+      document.body.insertAdjacentHTML("beforeend", `<p style="color: red;"> 载入 ${tag} 测试失败！</p>`);
+    }
+  </script>
+  <script>
+    import("../node_modules/lzma-wasm/dist/esm/index.js").then((pkg) => {
+      const { initWasm, compress, decompress } = pkg;
+      const tag = "dynamic import";
+      const pass = run(tag, initWasm, compress, decompress);
+      if (pass) {
+        document.body.insertAdjacentHTML("beforeend", `<p style="color: green;"> 载入 ${tag} 测试通过！</p>`);
+      } else {
+        document.body.insertAdjacentHTML("beforeend", `<p style="color: red;"> 载入 ${tag} 测试失败！</p>`);
+      }
+    });
+  </script>
+</body>
+
+</html>

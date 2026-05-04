@@ -28,7 +28,18 @@ esbuild.buildSync({
 esbuild.buildSync({
     entryPoints: ['./lib/index.ts'],
     format: 'cjs',
-    outfile: './dist/cjs/index.js',
+    outfile: './dist/cjs/index.cjs',
+    bundle: true,
+    minify: true,
+    logOverride: { 'empty-import-meta': 'silent' }
+});
+
+// 打包 IIFE 版本 供老式 script 标签使用(提供最佳向下兼容性)
+esbuild.buildSync({
+    entryPoints: ['./lib/index.ts'],
+    format: 'iife',
+    globalName: 'LzmaWasm', // 暴露给 window.LzmaWasm
+    outfile: './dist/iife/index.js',
     bundle: true,
     minify: true,
     logOverride: { 'empty-import-meta': 'silent' }
