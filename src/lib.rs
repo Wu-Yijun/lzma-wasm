@@ -1,4 +1,7 @@
-use lzma_rust2::{LzipReader, LzmaOptions, LzmaReader, LzmaWriter, XzReader};
+use lzma_rust2::{
+    LzipOptions, LzipReader, LzipWriter, LzmaOptions, LzmaReader, LzmaWriter, XzOptions, XzReader,
+    XzWriter,
+};
 use std::io::{Read, Write};
 use wasm_bindgen::prelude::*;
 
@@ -38,7 +41,11 @@ fn detect_decompress_reader(compressed: &[u8], mem_limit: u32) -> Result<AutoRea
 }
 
 #[wasm_bindgen]
-pub fn decompress_to_buffer(compressed: &[u8], out_buffer: &mut [u8], mem_limit: u32) -> Result<usize, JsValue> {
+pub fn decompress_to_buffer(
+    compressed: &[u8],
+    out_buffer: &mut [u8],
+    mem_limit: u32,
+) -> Result<usize, JsValue> {
     let mut reader = detect_decompress_reader(compressed, mem_limit)?;
 
     let mut total_read = 0;
@@ -76,15 +83,52 @@ pub fn decompress_dynamic(compressed: &[u8], mem_limit: u32) -> Result<Vec<u8>, 
     Ok(decompressed)
 }
 
+
 #[wasm_bindgen]
-pub fn encode_lzma_from_buffer(input: &[u8]) -> Result<Vec<u8>, JsValue> {
-    let mut writer = LzmaWriter::new_use_header(
-        Vec::new(),
-        &LzmaOptions::default(),
-        Some(input.len() as u64),
-    )
-    .unwrap();
-    writer.write_all(input).unwrap();
-    let res = writer.finish().unwrap();
-    Ok(res)
+pub fn compress_lzma(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
+    let mut options = LzmaOptions::default();
+    options.set_preset(level); // 完美利用库内置的 level 分析
+
+    let mut writer = LzmaWriter::new_use_header(Vec::new(), &options, Some(input.len() as u64))
+        .map_err(|e| JsValue::from_str(&format!("初始化 LzmaWriter 失败: {}", e)))?;
+
+    writer
+        .write_all(input)
+        .map_err(|e| JsValue::from_str(&format!("写入失败: {}", e)))?;
+    writer
+        .finish()
+        .map_err(|e| JsValue::from_str(&format!("结束压缩失败: {}", e)))
+}
+
+#[wasm_bindgen]
+pub fn compress_xz(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
+    // 现代格式 XZ 的专属 Options
+    let mut options = XzOptions::default();
+    options.lzma_options.set_preset(level);
+
+    let mut writer = XzWriter::new(Vec::new(), options)
+        .map_err(|e| JsValue::from_str(&format!("初始化 LzmaXzWriter 失败: {}", e)))?;
+
+    writer
+        .write_all(input)
+        .map_err(|e| JsValue::from_str(&format!("XZ 写入失败: {}", e)))?;
+    writer
+        .finish()
+        .map_err(|e| JsValue::from_str(&format!("XZ 结束压缩失败: {}", e)))
+}
+
+#[wasm_bindgen]
+pub fn compress_lzip(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
+    // LZIP 格式的专属 Options
+    let mut options = LzipOptions::default();
+    options.lzma_options.set_preset(level);
+
+    let mut writer = LzipWriter::new(Vec::new(), options);
+
+    writer
+        .write_all(input)
+        .map_err(|e| JsValue::from_str(&format!("LZIP 写入失败: {}", e)))?;
+    writer
+        .finish()
+        .map_err(|e| JsValue::from_str(&format!("LZIP 结束压缩失败: {}", e)))
 }
