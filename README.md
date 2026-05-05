@@ -51,6 +51,8 @@ const { initWasm, compress, decompress } = require('lzma-wasm');
 
 **⚠️ Important:** You must call and await `initWasm()` once before using any compression or decompression methods.
 
+The asynchronous `initWasm` can be replaced by the synchronous function `initWasmSync`.
+
 ```javascript
 import { initWasm, compress, decompress } from 'lzma-wasm';
 
