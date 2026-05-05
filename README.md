@@ -92,6 +92,16 @@ const result = decompress(compressed, {
 // achieved with 0 internal reallocations.
 ```
 
+And you can call `decompressToBuffer` to decompresses data directly into a pre-allocated JavaScript `Uint8Array`.
+
+```javascript
+// You must ensure enough space for your buffer:
+const buffer = new Unit8Array(2400);
+
+// The data will be written directly into the buffer you provided.
+const length = decompressToBuffer(compressed, buffer);
+```
+
 ## 📊 Performance Benchmarks
 
 Using a non-rigorous test, we briefly evaluated the compression and decompression performance of various algorithms and compression levels within our test environment. *(Note: The observed speeds may appear extraordinarily high because highly repetitive JSON text data was used as the test sample, rather than dense binary executables.)*
