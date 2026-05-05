@@ -23,19 +23,17 @@ impl<'a> Read for AutoReader<'a> {
 
 fn detect_decompress_reader(compressed: &[u8], mem_limit: u32) -> Result<AutoReader<'_>, JsValue> {
     if compressed.len() < 6 {
-        return Err(JsValue::from_str("输入的数据太短，无法识别格式"));
+        return Err(JsValue::from_str("Input data is too short to identify the format"));
     }
     if compressed.starts_with(&[0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00]) {
         let r = XzReader::new(compressed, true);
-        // .map_err(|e| JsValue::from_str(&format!("初始化 XzReader 失败: {}", e)))?;
         Ok(AutoReader::Xz(r))
     } else if compressed.starts_with(&[0x4C, 0x5A, 0x49, 0x50]) {
         let r = LzipReader::new(compressed);
-        // .map_err(|e| JsValue::from_str(&format!("初始化 LzipReader 失败: {}", e)))?;
         Ok(AutoReader::Lzip(r))
     } else {
         let r = LzmaReader::new_mem_limit(compressed, mem_limit, None)
-            .map_err(|e| JsValue::from_str(&format!("初始化 LzmaReader 失败: {}", e)))?;
+            .map_err(|e| JsValue::from_str(&format!("Decompression read failed: {}", e)))?;
         Ok(AutoReader::Lzma(r))
     }
 }
@@ -58,7 +56,7 @@ pub fn decompress_to_buffer(
 
         let n = reader
             .read(&mut out_buffer[total_read..])
-            .map_err(|e| JsValue::from_str(&format!("解压读取失败: {}", e)))?;
+            .map_err(|e| JsValue::from_str(&format!("Decompression read failed: {}", e)))?;
 
         if n == 0 {
             break;
@@ -69,16 +67,16 @@ pub fn decompress_to_buffer(
     Ok(total_read)
 }
 
-// 给普通用户用的，返回 Vec<u8>，Rust 自己管理扩容
+// Intended for general users; returns a Vec<u8>, with Rust handling capacity expansion automatically.
 #[wasm_bindgen]
 pub fn decompress_dynamic(compressed: &[u8], mem_limit: u32) -> Result<Vec<u8>, JsValue> {
     let mut reader = detect_decompress_reader(compressed, mem_limit)?;
 
     let mut decompressed = Vec::new();
-    // 使用 read_to_end 自动扩容
+    // Uses `read_to_end` for automatic resizing.
     reader
         .read_to_end(&mut decompressed)
-        .map_err(|e| JsValue::from_str(&format!("解压失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("Decompression failed: {}", e)))?;
 
     Ok(decompressed)
 }
@@ -87,39 +85,39 @@ pub fn decompress_dynamic(compressed: &[u8], mem_limit: u32) -> Result<Vec<u8>, 
 #[wasm_bindgen]
 pub fn compress_lzma(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
     let mut options = LzmaOptions::default();
-    options.set_preset(level); // 完美利用库内置的 level 分析
+    options.set_preset(level); // Leverages the library's built-in level analysis capabilities.
 
     let mut writer = LzmaWriter::new_use_header(Vec::new(), &options, Some(input.len() as u64))
-        .map_err(|e| JsValue::from_str(&format!("初始化 LzmaWriter 失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("Failed to initialize LzmaWriter: {}", e)))?;
 
     writer
         .write_all(input)
-        .map_err(|e| JsValue::from_str(&format!("写入失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("Write failed: {}", e)))?;
     writer
         .finish()
-        .map_err(|e| JsValue::from_str(&format!("结束压缩失败: {}", e)))
+        .map_err(|e| JsValue::from_str(&format!("Finalization failed: {}", e)))
 }
 
 #[wasm_bindgen]
 pub fn compress_xz(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
-    // 现代格式 XZ 的专属 Options
+    // Options specific to the modern XZ format.
     let mut options = XzOptions::default();
     options.lzma_options.set_preset(level);
 
     let mut writer = XzWriter::new(Vec::new(), options)
-        .map_err(|e| JsValue::from_str(&format!("初始化 LzmaXzWriter 失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("Failed to initialize LzmaXzWriter: {}", e)))?;
 
     writer
         .write_all(input)
-        .map_err(|e| JsValue::from_str(&format!("XZ 写入失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("XZ write failed: {}", e)))?;
     writer
         .finish()
-        .map_err(|e| JsValue::from_str(&format!("XZ 结束压缩失败: {}", e)))
+        .map_err(|e| JsValue::from_str(&format!("XZ finalization failed: {}", e)))
 }
 
 #[wasm_bindgen]
 pub fn compress_lzip(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
-    // LZIP 格式的专属 Options
+    // Options specific to the LZIP format.
     let mut options = LzipOptions::default();
     options.lzma_options.set_preset(level);
 
@@ -127,8 +125,8 @@ pub fn compress_lzip(input: &[u8], level: u32) -> Result<Vec<u8>, JsValue> {
 
     writer
         .write_all(input)
-        .map_err(|e| JsValue::from_str(&format!("LZIP 写入失败: {}", e)))?;
+        .map_err(|e| JsValue::from_str(&format!("LZIP write failed: {}", e)))?;
     writer
         .finish()
-        .map_err(|e| JsValue::from_str(&format!("LZIP 结束压缩失败: {}", e)))
+        .map_err(|e| JsValue::from_str(&format!("LZIP finalization failed: {}", e)))
 }
