@@ -3,3 +3,5 @@
 /node_modules/
 /dist/
 /*.tgz
+# will be auto build in Github Actions
+/lib/wasm-b64.ts
