@@ -1,6 +1,6 @@
 {
   "name": "lzma-wasm",
-  "version": "1.0.6",
+  "version": "1.0.6b",
   "author": "Aluria",
   "description": "High-performance universal LZMA/XZ/LZIP compressor & decompressor in WebAssembly (Rust bindings)",
   "keywords": [
@@ -54,11 +54,13 @@
   "scripts": {
     "build": "node ./scripts/build.ts",
     "tsc": "tsc",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
     "esbuild": "^0.28.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   }
 }

@@ -1,6 +1,5 @@
 /.vscode/
 /target/
-/test/
 /node_modules/
 /dist/
 /*.tgz

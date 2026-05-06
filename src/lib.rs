@@ -73,6 +73,7 @@ pub fn decompress_dynamic(compressed: &[u8], mem_limit: u32) -> Result<Vec<u8>, 
     let mut reader = detect_decompress_reader(compressed, mem_limit)?;
 
     let mut decompressed = Vec::new();
+
     // Uses `read_to_end` for automatic resizing.
     reader
         .read_to_end(&mut decompressed)
