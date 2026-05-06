@@ -18,12 +18,25 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            azure.archive.ubuntu.com:80
+            github.com:443
+            api.github.com:443
+            release-assets.githubusercontent.com:443
+            rustwasm.github.io:443
+            crates.io:443
+            index.crates.io:443
+            static.crates.io:443
+            static.rust-lang.org:443
+            nodejs.org:443
+            registry.npmjs.org:443
 
       - name: Checkout repository
         uses: actions/checkout@v6
